@@ -1,0 +1,209 @@
+<!-- HTML code for the search portal -->
+<html>
+<head>
+  <style>
+    /* CSS code for the search portal */
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px;
+    }
+
+    .search-input {
+      width: 300px;
+      height: 40px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      font-size: 18px;
+    }
+
+    .search-button {
+      width: 100px;
+      height: 40px;
+      border: none;
+      background-color: #4CAF50;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .search-button:hover {
+      background-color: #3a8c3a;
+    }
+
+    .results {
+      margin: 20px;
+      padding: 20px;
+      border: 1px solid #ccc;
+    }
+
+    .result-item {
+      margin: 10px 0;
+    }
+
+    .result-title {
+      font-weight: bold;
+    }
+
+    .result-info {
+      font-style: italic;
+    }
+
+    .result-nuts {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Search Portal for Nut Allergy</h1>
+    <div class="search-box">
+      <input type="text" id="search-input" class="search-input" placeholder="Enter a dish name...">
+      <button id="search-button" class="search-button">Search</button>
+    </div>
+    <div id="results" class="results">
+      <!-- Results will be displayed here -->
+    </div>
+  </div>
+  <script>
+    // JavaScript code for the search portal
+    // Get the elements from the HTML document
+    const searchInput = document.getElementById("search-input");
+    const searchButton = document.getElementById("search-button");
+    const results = document.getElementById("results");
+
+    // Define a function to search for recipes online
+    function searchRecipes(query) {
+      // Clear the previous results
+      results.innerHTML = "";
+
+      // Use the Bing Web Search API to get the web pages related to the query
+      // You will need to get an API key from https://azure.microsoft.com/en-us/services/cognitive-services/bing-web-search-api/
+      // and replace it in the header below
+      const url = "https://api.bing.microsoft.com/v7.0/search?q=" + query + "&responseFilter=Webpages";
+      const header = {
+        "Ocp-Apim-Subscription-Key": "API-KEY"
+      };
+
+      // Fetch the data from the API using the fetch method
+      fetch(url, {headers: header})
+        .then(response => response.json()) // Convert the response to JSON format
+        .then(data => {
+          // Get the web pages from the data
+          const webPages = data.webPages.value;
+
+          // Loop through each web page and extract the relevant information
+          for (let webPage of webPages) {
+            // Get the title, url, and snippet of the web page
+            const title = webPage.name;
+            const url = webPage.url;
+            const snippet = webPage.snippet;
+
+            // Create a new element for the percentage information
+const resultPercent = document.createElement("p");
+resultPercent.className = "result-percent";
+
+// Initialize a variable to store the number of nut-containing recipes
+let nutCount = 0;
+
+// Loop through each web page and check if it contains nuts
+for (let webPage of webPages) {
+  // Use a regular expression to check if the snippet contains the word "nut" or its variants
+  const nutRegex = /nut(s|ty|meg|ella|rition|cracker|ella|shell|rient|meg|shell|cracker)/i;
+  const nutMatch = snippet.match(nutRegex);
+
+  // If there is a match, increment the nut count
+  if (nutMatch) {
+    nutCount++;
+  }
+}
+
+            const resultItem = document.createElement("div");
+            resultItem.className = "result-item";
+            
+// Calculate the percentage of nut-containing recipes
+const percent = Math.round((nutCount / webPages.length) * 100);
+
+// Display the percentage in the result item
+resultPercent.textContent = "This dish has " + percent + "% of recipes that contain nuts or nut products.";
+resultItem.appendChild(resultPercent);
+
+            // Create a new element to display the result
+           
+
+            // Create a new element for the title and make it a link
+            const resultTitle = document.createElement("a");
+            resultTitle.className = "result-title";
+            resultTitle.href = url;
+            resultTitle.target = "_blank";
+            resultTitle.textContent = title;
+
+            // Create a new element for the snippet
+            const resultSnippet = document.createElement("p");
+            resultSnippet.className = "result-snippet";
+            resultSnippet.textContent = snippet;
+
+            // Create a new element for the nut information
+            const resultNuts = document.createElement("p");
+            resultNuts.className = "result-nuts";
+
+            // Use a regular expression to check if the snippet contains the word "nut" or its variants
+            // This is a very simple and naive way to detect nuts, and it may not be accurate or comprehensive
+            // You may want to use a more sophisticated method, such as natural language processing or machine learning
+            const nutRegex = /nut(s|ty|meg|ella|rition|cracker|ella|shell|rient|meg|shell|cracker)/i;
+            const nutMatch = snippet.match(nutRegex);
+
+            // If there is a match, display a warning message
+            if (nutMatch) {
+              resultNuts.textContent = "Warning: This recipe may contain nuts or nut products.";
+            } else {
+              // Otherwise, display a safe message
+             resultNuts.textContent = "This recipe is likely nut-free."; 
+            }
+
+            // Append the title, snippet, and nut information to the result item
+            resultItem.appendChild(resultTitle);
+            resultItem.appendChild(resultSnippet);
+            resultItem.appendChild(resultNuts);
+
+            // Append the result item to the results container
+            results.appendChild(resultItem);
+          }
+        })
+        .catch(error => {
+          // If there is an error, display a message
+          results.textContent = "Sorry, something went wrong. Please try again later.";
+          console.error(error);
+        });
+    }
+
+    // Add an event listener to the search button to trigger the search function
+    searchButton.addEventListener("click", () => {
+      // Get the value of the search input
+      const query = searchInput.value;
+
+      // If the query is not empty, search for recipes
+      if (query) {
+        searchRecipes(query);
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
